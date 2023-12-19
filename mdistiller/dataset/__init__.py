@@ -1,7 +1,7 @@
 from .cifar100 import get_cifar100_dataloaders, get_cifar100_dataloaders_sample
 from .imagenet import get_imagenet_dataloaders, get_imagenet_dataloaders_sample
 from .tiny_imagenet import get_tinyimagenet_dataloader, get_tinyimagenet_dataloader_sample
-
+from .cub_200_2011 import get_cub_200_2011_dataloader, get_cub_200_2011_dataloader_sample
 
 def get_dataset(cfg):
     if cfg.DATASET.TYPE == "cifar100":
@@ -50,6 +50,23 @@ def get_dataset(cfg):
                 num_workers=cfg.DATASET.NUM_WORKERS,
             )
         num_classes = 200
+        
+    elif cfg.DATASET.TYPE == "cub_200_2011":
+        if cfg.DISTILLER.TYPE in ("CRD",):
+            train_loader, val_loader, num_data = get_cub_200_2011_dataloader_sample(
+                batch_size=cfg.SOLVER.BATCH_SIZE,
+                val_batch_size=cfg.DATASET.TEST.BATCH_SIZE,
+                num_workers=cfg.DATASET.NUM_WORKERS,
+                k=cfg.CRD.NCE.K,
+            )
+        else:
+            train_loader, val_loader, num_data = get_cub_200_2011_dataloader(
+                batch_size=cfg.SOLVER.BATCH_SIZE,
+                val_batch_size=cfg.DATASET.TEST.BATCH_SIZE,
+                num_workers=cfg.DATASET.NUM_WORKERS,
+            )
+        num_classes = 200
+        
     else:
         raise NotImplementedError(cfg.DATASET.TYPE)
 

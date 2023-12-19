@@ -75,6 +75,7 @@ cifar_model_dict = {
 
 tiny_imagenet_model_dict = {
     "ResNet18": (ResNet18, tiny_imagenet_model_prefix + "ResNet18_vanilla/ti_res18"),
+    # "ResNet18": (ResNet18, None),
     "MobileNetV2": (mobilenetv2_tinyimagenet, None),
     "ShuffleV2": (ShuffleV2, None),
 }

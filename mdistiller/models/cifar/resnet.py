@@ -94,7 +94,7 @@ class Bottleneck(nn.Module):
 
 
 class ResNet(nn.Module):
-    def __init__(self, depth, num_filters, block_name="BasicBlock", num_classes=10):
+    def __init__(self, depth, num_filters, block_name="BasicBlock", num_classes=1000):
         super(ResNet, self).__init__()
         # Model type specifies number of layers for CIFAR-10 model
         if block_name.lower() == "basicblock":
@@ -245,8 +245,8 @@ def resnet32x4(**kwargs):
 if __name__ == "__main__":
     import torch
 
-    x = torch.randn(2, 3, 32, 32)
-    net = resnet8x4(num_classes=20)
+    x = torch.randn(2, 3, 448, 448)
+    net = resnet8x4(num_classes=1000)
     logit, feats = net(x)
 
     for f in feats["feats"]:

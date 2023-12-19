@@ -3,6 +3,7 @@ import argparse
 import torch
 import torch.nn as nn
 import torch.backends.cudnn as cudnn
+import pdb
 
 cudnn.benchmark = True
 
@@ -38,6 +39,7 @@ def main(cfg, resume, opts):
     show_cfg(cfg)
     # init dataloader & models
     train_loader, val_loader, num_data, num_classes = get_dataset(cfg)
+    # batch: [[64, 3, 32, 32],[64]]
 
     # vanilla
     if cfg.DISTILLER.TYPE == "NONE":
@@ -53,17 +55,25 @@ def main(cfg, resume, opts):
     # distillation
     else:
         print(log_msg("Loading teacher model", "INFO"))
-        if cfg.DATASET.TYPE == "imagenet" or cfg.DATASET.TYPE == "cub_200_2011":
+        if cfg.DATASET.TYPE == "imagenet":
             model_teacher = imagenet_model_dict[cfg.DISTILLER.TEACHER](pretrained=True)
             model_student = imagenet_model_dict[cfg.DISTILLER.STUDENT](pretrained=False)
         else:
-            model_dict = tiny_imagenet_model_dict if cfg.DATASET.TYPE == "tiny_imagenet" else cifar_model_dict
+            # model_dict = imagenet_model_dict
+            model_dict = cifar_model_dict
+            #if cfg.DATASET.TYPE == "tiny_imagenet" else cifar_model_dict
             net, pretrain_model_path = model_dict[cfg.DISTILLER.TEACHER]
             assert (
                 pretrain_model_path is not None
             ), "no pretrain model for teacher {}".format(cfg.DISTILLER.TEACHER)
             model_teacher = net(num_classes=num_classes)
-            model_teacher.load_state_dict(load_checkpoint(pretrain_model_path)["model"])
+            
+            net_weights = model_teacher.state_dict()
+            pre_weight=load_checkpoint(pretrain_model_path)["model"]
+            pre_dict = {k: v for k, v in pre_weight.items() if net_weights[k].numel() == v.numel()}
+            model_teacher.load_state_dict(pre_dict,strict=False)
+            print(model_teacher)
+                                          
             model_student = model_dict[cfg.DISTILLER.STUDENT][0](
                 num_classes=num_classes
             )
